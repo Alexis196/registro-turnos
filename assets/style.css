@@ -1,0 +1,93 @@
+:root {
+    --primario: #007BFF;
+    /* Azul */
+    --secundario: #f4f6f9;
+    /* Gris muy claro */
+    --texto: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--secundario);
+    color: var(--texto);
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primario);
+    margin-bottom: 10px;
+}
+
+h2 {
+    color: var(--primario);
+    margin-top: 40px;
+    text-align: center;
+}
+
+p {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 20px auto;
+    width: 90%;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background: var(--primario);
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+input {
+    width: 95%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Responsividad */
+/* Responsividad */
+@media (max-width: 768px) {
+
+    * {
+        font-size: 12px;
+    }
+
+    body {
+        padding: 0;
+    }
+
+    table {
+        border-collapse: collapse;
+        margin: 5px auto;
+        width: 95%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+}
