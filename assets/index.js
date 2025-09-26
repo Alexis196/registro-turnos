@@ -1,61 +1,102 @@
 const startHour = 16;
 const endHour = 24;
 
+// Función para formatear fecha en local "YYYY-MM-DD"
+function formatFechaLocal(date) {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+}
 
-function generarTabla(tbodyId) {
+// Generar tabla dinámicamente con las canchas y reservas
+function generarTabla(tbodyId, canchas, reservas) {
     const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = "";
 
     for (let h = startHour; h < endHour; h++) {
         const row = document.createElement("tr");
+        const mitad = Math.ceil(canchas.length / 2);
 
-        // Cancha 1
-        const cancha1 = document.createElement("td");
-        cancha1.setAttribute("data-label", "Cancha 1");
-        const input1 = document.createElement("input");
-        input1.type = "text";
-        input1.placeholder = "Nombre...";
-        cancha1.appendChild(input1);
-        row.appendChild(cancha1);
+        // Primeras canchas antes de la hora
+        for (let i = 0; i < mitad; i++) {
+            const td = crearCelda(canchas[i], h, reservas);
+            row.appendChild(td);
+        }
 
-        // Hora
-        const hora = document.createElement("td");
-        hora.setAttribute("data-label", "Hora");
-        hora.textContent = `${h}:00 - ${h + 1}:00`;
-        row.appendChild(hora);
+        // Celda de hora
+        const horaTd = document.createElement("td");
+        horaTd.setAttribute("data-label", "Hora");
+        horaTd.textContent = `${h}:00 - ${h + 1}:00`;
+        horaTd.style.fontWeight = "bold";
+        horaTd.style.textAlign = "center";
+        row.appendChild(horaTd);
 
-        // Cancha 2
-        const cancha2 = document.createElement("td");
-        cancha2.setAttribute("data-label", "Cancha 2");
-        const input2 = document.createElement("input");
-        input2.type = "text";
-        input2.placeholder = "Nombre...";
-        cancha2.appendChild(input2);
-        row.appendChild(cancha2);
+        // Canchas restantes después de la hora
+        for (let i = mitad; i < canchas.length; i++) {
+            const td = crearCelda(canchas[i], h, reservas);
+            row.appendChild(td);
+        }
 
         tbody.appendChild(row);
     }
 }
 
+// Crear celda de cancha
+function crearCelda(cancha, hora, reservas) {
+    const td = document.createElement("td");
+    td.setAttribute("data-label", cancha.cancha);
 
-// Celdas editables
-function convertirEnInput(cell) {
-    if (cell.querySelector("input")) return;
-    const valorAnterior = cell.textContent;
-    cell.textContent = "";
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = valorAnterior;
-    input.placeholder = "Nombre...";
-    cell.appendChild(input);
-    input.focus();
+    const hoyStr = formatFechaLocal(new Date()); // "YYYY-MM-DD"
+    console.log(`fecha de hoy ${hoyStr}`);
 
-    input.addEventListener("blur", () => {
-        cell.textContent = input.value;
+    const turno = reservas.find(r => {
+        // Tomar solo la parte de fecha del string original del backend
+        const fechaReservaStr = r.fecha.split("T")[0]; // "YYYY-MM-DD"
+        console.log(`fecha de reserva ${fechaReservaStr}`);
+
+        return r.cancha === cancha._id &&
+            fechaReservaStr === hoyStr &&
+            r.hora === `${hora}:00 - ${hora + 1}:00`;
     });
 
-    input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") input.blur();
-    });
+    if (turno) {
+        td.textContent = turno.usuario;
+        td.style.backgroundColor = "#f8d7da"; // rojo suave
+        td.style.textAlign = "center";
+    } else {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.placeholder = "Nombre...";
+        td.appendChild(input);
+        td.style.backgroundColor = "#d4edda"; // verde suave
+    }
+
+    return td;
+}
+
+// Traer canchas y reservas del backend
+async function cargarCanchasYReservas() {
+    try {
+        const [resCanchas, resReservas] = await Promise.all([
+            fetch("http://localhost:4000/api/canchas"),
+            fetch("http://localhost:4000/api/reservas/obtenerReservas")
+        ]);
+
+        const dataCanchas = await resCanchas.json();
+        const dataReservas = await resReservas.json();
+
+        // Separar canchas por tipo
+        const padel = dataCanchas.filter(c => c.tipo_cancha === "Pádel");
+        const futbol = dataCanchas.filter(c => c.tipo_cancha === "Fútbol 5");
+
+        generarTabla("tabla-padel", padel, dataReservas);
+        generarTabla("tabla-futbol", futbol, dataReservas);
+
+        ponerFechaHoy();
+    } catch (error) {
+        console.error("Error cargando canchas y reservas:", error);
+    }
 }
 
 // Fecha automática
@@ -64,11 +105,13 @@ function ponerFechaHoy() {
     const opciones = { day: '2-digit', month: '2-digit', year: 'numeric' };
     const fechaFormateada = hoy.toLocaleDateString('es-ES', opciones);
 
-    document.getElementById("titulo-padel").textContent = "Cancha de Pádel - Fecha: " + fechaFormateada;
-    document.getElementById("titulo-futbol").textContent = "Cancha de Fútbol 5 - Fecha: " + fechaFormateada;
+    document.getElementById("titulo-padel").textContent =
+        "Cancha de Pádel - Fecha: " + fechaFormateada;
+    document.getElementById("titulo-futbol").textContent =
+        "Cancha de Fútbol 5 - Fecha: " + fechaFormateada;
 }
 
-// Ejecutar
-generarTabla("tabla-padel");
-generarTabla("tabla-futbol");
-ponerFechaHoy();
+// Ejecutar al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    cargarCanchasYReservas();
+});
