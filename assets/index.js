@@ -94,7 +94,7 @@ function crearCelda(cancha, hora, reservas) {
     console.log("Enviando reserva:", nuevaReserva);
 
     try {
-        const res = await fetch("http://localhost:4000/api/reservas/reservar", {
+        const res = await fetch("https://back-app-registros.onrender.com/api/reservas/reservar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevaReserva)
@@ -143,7 +143,7 @@ function crearCelda(cancha, hora, reservas) {
             if (!nombre) {
                 // eliminar
                 try {
-                    const res = await fetch(`http://localhost:4000/api/reservas/eliminar-reserva/${turno._id}`, {
+                    const res = await fetch(`https://back-app-registros.onrender.com/api/reservas/eliminar-reserva/${turno._id}`, {
                         method: "DELETE"
                     });
                     if (res.ok) {
@@ -166,7 +166,7 @@ function crearCelda(cancha, hora, reservas) {
 
             // actualizar
             try {
-                const res = await fetch(`http://localhost:4000/api/reservas/modificar-reserva/${turno._id}`, {
+                const res = await fetch(`https://back-app-registros.onrender.com/api/reservas/modificar-reserva/${turno._id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -201,8 +201,8 @@ function crearCelda(cancha, hora, reservas) {
 async function cargarCanchasYReservas() {
     try {
         const [resCanchas, resReservas] = await Promise.all([
-            fetch("http://localhost:4000/api/canchas"),
-            fetch("http://localhost:4000/api/reservas/obtenerReservas")
+            fetch("https://back-app-registros.onrender.com/api/canchas"),
+            fetch("https://back-app-registros.onrender.com/api/reservas/obtenerReservas")
         ]);
 
         const dataCanchas = await resCanchas.json();
